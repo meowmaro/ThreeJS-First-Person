@@ -2,7 +2,6 @@ import * as THREE from "three";
 import { PointerLockControls } from "three/addons/controls/PointerLockControls.js";
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-
 let camera, scene, renderer, controls;
 
 const objects = [];
@@ -156,6 +155,27 @@ function init() {
 
   const floor = new THREE.Mesh(floorGeometry, floorMaterial);
   scene.add(floor);
+
+  const pillarGeometry = new THREE.CylinderGeometry(5, 5, 100, 32);
+  const pillarMaterial = new THREE.MeshBasicMaterial({ color: 0x808080 });
+  const sphereGeometry = new THREE.SphereGeometry(50, 32, 32);
+  const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xff6660 });
+  for (let i = 0; i < 500; i++) {
+  const pillar = new THREE.Mesh(pillarGeometry, pillarMaterial);
+  const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+
+  const x = Math.random() * 1800 - 900;
+  const z = Math.random() * 1800 - 900;
+
+  pillar.position.set(x, 50, z);
+  sphere.position.set(x, 150, z);
+
+  sphere.position.y += -40;
+
+  scene.add(pillar);
+  scene.add(sphere);
+  }
+
 
   renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(window.devicePixelRatio);
