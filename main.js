@@ -140,6 +140,17 @@ function init() {
     10
   );
 
+
+  // Gun
+  const loader = new GLTFLoader();
+  loader.load('./resources/scene.gltf', function (gltf) {
+    gunModel = gltf.scene;
+    gunModel.scale.set(0.1, 0.1, 0.1);
+    gunModel.position.set(2, -1, -2);
+    gunModel.rotation.set(0, Math.PI, 0);
+    camera.add(gunModel);
+  });
+
   // Floor
   const floorTexture = new THREE.TextureLoader().load(
     "./resources/devtiles.png"
@@ -240,6 +251,7 @@ function animate() {
     const targetFOV = isSprinting ? sprintFOV : normalFOV;
     camera.fov += (targetFOV - camera.fov) * fovTransitionSpeed * delta;
     camera.updateProjectionMatrix();
+
   }
 
   prevTime = time;
