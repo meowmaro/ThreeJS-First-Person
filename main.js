@@ -144,9 +144,9 @@ function init() {
   const loader = new GLTFLoader();
   loader.load('./resources/scene.gltf', function (gltf) {
     gunModel = gltf.scene;
-    gunModel.scale.set(0.1, 0.1, 0.1);
+    gunModel.scale.set(2, 2, 2);
     gunModel.position.set(2, -1, -2);
-    gunModel.rotation.set(0, Math.PI, 0);
+    gunModel.rotation.set(0, Math.PI, 0.05);
     camera.add(gunModel);
   });
 
