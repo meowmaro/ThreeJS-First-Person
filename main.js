@@ -1,5 +1,5 @@
-import * as THREE from "three";
-import { PointerLockControls } from "three/addons/controls/PointerLockControls.js";
+import * as THREE from 'three';
+import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 let camera, scene, renderer, controls;
@@ -50,53 +50,53 @@ function init() {
 
   controls = new PointerLockControls(camera, document.body);
 
-  const blocker = document.getElementById("blocker");
-  const instructions = document.getElementById("instructions");
+  const blocker = document.getElementById('blocker');
+  const instructions = document.getElementById('instructions');
 
-  instructions.addEventListener("click", function () {
+  instructions.addEventListener('click', function () {
     controls.lock();
   });
 
-  controls.addEventListener("lock", function () {
-    instructions.style.display = "none";
-    blocker.style.display = "none";
+  controls.addEventListener('lock', function () {
+    instructions.style.display = 'none';
+    blocker.style.display = 'none';
   });
 
-  controls.addEventListener("unlock", function () {
-    blocker.style.display = "block";
-    instructions.style.display = "";
+  controls.addEventListener('unlock', function () {
+    blocker.style.display = 'block';
+    instructions.style.display = '';
   });
 
   scene.add(controls.object);
 
   const onKeyDown = function (event) {
     switch (event.code) {
-      case "ArrowUp":
-      case "KeyW":
+      case 'ArrowUp':
+      case 'KeyW':
         moveForward = true;
         break;
 
-      case "ArrowLeft":
-      case "KeyA":
+      case 'ArrowLeft':
+      case 'KeyA':
         moveLeft = true;
         break;
 
-      case "ArrowDown":
-      case "KeyS":
+      case 'ArrowDown':
+      case 'KeyS':
         moveBackward = true;
         break;
 
-      case "ArrowRight":
-      case "KeyD":
+      case 'ArrowRight':
+      case 'KeyD':
         moveRight = true;
         break;
 
-      case "Space":
+      case 'Space':
         if (canJump === true) velocity.y += jumpForce;
         canJump = false;
         break;
 
-      case "ShiftLeft":
+      case 'ShiftLeft':
         isSprinting = true;
         break;
     }
@@ -104,34 +104,34 @@ function init() {
 
   const onKeyUp = function (event) {
     switch (event.code) {
-      case "ArrowUp":
-      case "KeyW":
+      case 'ArrowUp':
+      case 'KeyW':
         moveForward = false;
         break;
 
-      case "ArrowLeft":
-      case "KeyA":
+      case 'ArrowLeft':
+      case 'KeyA':
         moveLeft = false;
         break;
 
-      case "ArrowDown":
-      case "KeyS":
+      case 'ArrowDown':
+      case 'KeyS':
         moveBackward = false;
         break;
 
-      case "ArrowRight":
-      case "KeyD":
+      case 'ArrowRight':
+      case 'KeyD':
         moveRight = false;
         break;
 
-      case "ShiftLeft":
+      case 'ShiftLeft':
         isSprinting = false;
         break;
     }
   };
 
-  document.addEventListener("keydown", onKeyDown);
-  document.addEventListener("keyup", onKeyUp);
+  document.addEventListener('keydown', onKeyDown);
+  document.addEventListener('keyup', onKeyUp);
 
   raycaster = new THREE.Raycaster(
     new THREE.Vector3(),
@@ -139,7 +139,6 @@ function init() {
     0,
     10
   );
-
 
   // Gun
   const loader = new GLTFLoader();
@@ -153,7 +152,7 @@ function init() {
 
   // Floor
   const floorTexture = new THREE.TextureLoader().load(
-    "./resources/devtiles.png"
+    './resources/devtiles.png'
   );
   floorTexture.wrapS = THREE.RepeatWrapping;
   floorTexture.wrapT = THREE.RepeatWrapping;
@@ -172,21 +171,20 @@ function init() {
   const sphereGeometry = new THREE.SphereGeometry(50, 32, 32);
   const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xff6660 });
   for (let i = 0; i < 500; i++) {
-  const pillar = new THREE.Mesh(pillarGeometry, pillarMaterial);
-  const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+    const pillar = new THREE.Mesh(pillarGeometry, pillarMaterial);
+    const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
 
-  const x = Math.random() * 1800 - 900;
-  const z = Math.random() * 1800 - 900;
+    const x = Math.random() * 1800 - 900;
+    const z = Math.random() * 1800 - 900;
 
-  pillar.position.set(x, 50, z);
-  sphere.position.set(x, 150, z);
+    pillar.position.set(x, 50, z);
+    sphere.position.set(x, 150, z);
 
-  sphere.position.y += -40;
+    sphere.position.y += -40;
 
-  scene.add(pillar);
-  scene.add(sphere);
+    scene.add(pillar);
+    scene.add(sphere);
   }
-
 
   renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(window.devicePixelRatio);
@@ -194,7 +192,7 @@ function init() {
   renderer.setAnimationLoop(animate);
   document.body.appendChild(renderer.domElement);
 
-  window.addEventListener("resize", onWindowResize);
+  window.addEventListener('resize', onWindowResize);
 }
 
 function onWindowResize() {
@@ -251,7 +249,6 @@ function animate() {
     const targetFOV = isSprinting ? sprintFOV : normalFOV;
     camera.fov += (targetFOV - camera.fov) * fovTransitionSpeed * delta;
     camera.updateProjectionMatrix();
-
   }
 
   prevTime = time;
