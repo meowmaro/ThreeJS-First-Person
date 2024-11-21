@@ -28,6 +28,7 @@ h2 {
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
+  z-index: 3;
 }
 
 #instructions {
@@ -40,6 +41,7 @@ h2 {
   text-align: center;
   font-size: 14px;
   cursor: pointer;
+  z-index: 2;
 }
 
 #crosshair {
@@ -48,6 +50,12 @@ h2 {
   left: 50%;
   transform: translate(-50%, -50%);
   pointer-events: none;
-  width: 20px;
-  height: 20px;
+  width: 5%;
+  height: auto;
+  z-index: 1;
+}
+
+#playButton {
+  width: 5%;
+  height: auto;
 }
