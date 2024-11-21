@@ -41,3 +41,13 @@ h2 {
   font-size: 14px;
   cursor: pointer;
 }
+
+#crosshair {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  width: 20px;
+  height: 20px;
+}

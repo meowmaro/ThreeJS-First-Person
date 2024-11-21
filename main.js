@@ -9,18 +9,20 @@ let raycaster;
 
 let gunModel;
 
+// movement
 let moveForward = false;
 let moveBackward = false;
 let moveLeft = false;
 let moveRight = false;
 let canJump = false;
-
+let jumpKeyHeld = false;
 let isSprinting = false;
 const normalSpeed = 450.0;
 const sprintSpeed = 700.0;
 const jumpForce = 75.0;
 const jumpGravity = 25.0;
 
+// fov changes
 const normalFOV = 70;
 const sprintFOV = 90;
 const fovTransitionSpeed = 9;
@@ -32,6 +34,7 @@ const direction = new THREE.Vector3();
 init();
 
 function init() {
+  // camera setup
   camera = new THREE.PerspectiveCamera(
     75,
     window.innerWidth / window.innerHeight,
@@ -40,14 +43,17 @@ function init() {
   );
   camera.position.y = 10;
 
+  // scene setup
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0xffffff);
   scene.fog = new THREE.Fog(0xffffff, 0, 750);
 
+  // lighting
   const light = new THREE.HemisphereLight(0xeeeeff, 0x777788, 2.5);
   light.position.set(0.5, 1, 0.75);
   scene.add(light);
 
+  // controls setup
   controls = new PointerLockControls(camera, document.body);
 
   const blocker = document.getElementById('blocker');
@@ -69,6 +75,7 @@ function init() {
 
   scene.add(controls.object);
 
+  // keyboard input
   const onKeyDown = function (event) {
     switch (event.code) {
       case 'ArrowUp':
@@ -92,6 +99,7 @@ function init() {
         break;
 
       case 'Space':
+        jumpKeyHeld = true;
         if (canJump === true) velocity.y += jumpForce;
         canJump = false;
         break;
@@ -124,6 +132,10 @@ function init() {
         moveRight = false;
         break;
 
+      case 'Space':
+        jumpKeyHeld = false;
+        break;
+
       case 'ShiftLeft':
         isSprinting = false;
         break;
@@ -133,6 +145,7 @@ function init() {
   document.addEventListener('keydown', onKeyDown);
   document.addEventListener('keyup', onKeyUp);
 
+  // raycaster setup
   raycaster = new THREE.Raycaster(
     new THREE.Vector3(),
     new THREE.Vector3(0, -1, 0),
@@ -140,7 +153,7 @@ function init() {
     10
   );
 
-  // Gun
+  // gun model loading
   const loader = new GLTFLoader();
   loader.load('./resources/scene.gltf', function (gltf) {
     gunModel = gltf.scene;
@@ -150,22 +163,23 @@ function init() {
     camera.add(gunModel);
   });
 
-  // Floor
+  // floor
   const floorTexture = new THREE.TextureLoader().load(
     './resources/devtiles.png'
   );
   floorTexture.wrapS = THREE.RepeatWrapping;
   floorTexture.wrapT = THREE.RepeatWrapping;
-  floorTexture.repeat.set(70, 70);
+  floorTexture.repeat.set(200, 200);
 
   const floorMaterial = new THREE.MeshBasicMaterial({ map: floorTexture });
 
-  const floorGeometry = new THREE.PlaneGeometry(2000, 2000);
+  const floorGeometry = new THREE.PlaneGeometry(10000, 10000);
   floorGeometry.rotateX(-Math.PI / 2);
 
   const floor = new THREE.Mesh(floorGeometry, floorMaterial);
   scene.add(floor);
 
+  // random pillars and spheres
   const pillarGeometry = new THREE.CylinderGeometry(5, 5, 100, 32);
   const pillarMaterial = new THREE.MeshBasicMaterial({ color: 0x808080 });
   const sphereGeometry = new THREE.SphereGeometry(50, 32, 32);
@@ -186,6 +200,7 @@ function init() {
     scene.add(sphere);
   }
 
+  // renderer setup
   renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -196,6 +211,7 @@ function init() {
 }
 
 function onWindowResize() {
+  // window resize
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
 
@@ -206,32 +222,42 @@ function animate() {
   const time = performance.now();
 
   if (controls.isLocked === true) {
+    // raycast check
     raycaster.ray.origin.copy(controls.object.position);
     raycaster.ray.origin.y -= 10;
 
     const intersections = raycaster.intersectObjects(objects, false);
 
     const onObject = intersections.length > 0;
-
+    // keeps time between frames consistent
     const delta = (time - prevTime) / 1000;
 
+    // velocity damping
     velocity.x -= velocity.x * 10.0 * delta;
     velocity.z -= velocity.z * 10.0 * delta;
 
+    // gravity effect
     velocity.y -= 9.8 * jumpGravity * delta;
 
+    // movement direction
     direction.z = Number(moveForward) - Number(moveBackward);
     direction.x = Number(moveRight) - Number(moveLeft);
     direction.normalize();
 
     const speed = isSprinting ? sprintSpeed : normalSpeed;
 
+    // apply movement
     if (moveForward || moveBackward) velocity.z -= direction.z * speed * delta;
     if (moveLeft || moveRight) velocity.x -= direction.x * speed * delta;
 
     if (onObject === true) {
       velocity.y = Math.max(0, velocity.y);
       canJump = true;
+    }
+
+    if (jumpKeyHeld && canJump) {
+      velocity.y += jumpForce;
+      canJump = false;
     }
 
     controls.moveRight(-velocity.x * delta);
@@ -246,6 +272,7 @@ function animate() {
       canJump = true;
     }
 
+    // fov transition
     const targetFOV = isSprinting ? sprintFOV : normalFOV;
     camera.fov += (targetFOV - camera.fov) * fovTransitionSpeed * delta;
     camera.updateProjectionMatrix();
