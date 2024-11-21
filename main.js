@@ -4,7 +4,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 let camera, scene, renderer, controls;
 const objects = [];
-let raycaster, gunModel;
+let raycaster, gunModel, map;
 
 // movement
 let moveForward = false,
@@ -28,6 +28,10 @@ let prevTime = performance.now();
 const velocity = new THREE.Vector3(),
   direction = new THREE.Vector3();
 
+let bobbingTime = 0;
+const originalGunPosition = new THREE.Vector3(1.2, -1, -2);
+const gunReturnSpeed = 1.5;
+
 init();
 
 function init() {
@@ -36,14 +40,14 @@ function init() {
     75,
     window.innerWidth / window.innerHeight,
     1,
-    1000
+    99999 // Increase the render distance
   );
   camera.position.y = 10;
 
   // scene setup
   scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xffffff);
-  scene.fog = new THREE.Fog(0xffffff, 0, 750);
+  scene.background = new THREE.Color(0x87ceeb);
+  scene.fog = new THREE.Fog(0x87ceeb, 0, 9999);
 
   // lighting
   const light = new THREE.HemisphereLight(0xeeeeff, 0x777788, 2.5);
@@ -76,6 +80,9 @@ function init() {
 
   // random pillars and spheres
   createRandomObjects();
+
+  // map loading
+  loadMap();
 
   // renderer
   renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -128,7 +135,9 @@ function onKeyDown(event) {
       canJump = false;
       break;
     case 'ShiftLeft':
-      isSprinting = true;
+      if (moveForward && !moveBackward) {
+        isSprinting = true;
+      }
       break;
   }
 }
@@ -146,6 +155,7 @@ function onKeyUp(event) {
     case 'ArrowDown':
     case 'KeyS':
       moveBackward = false;
+      isSprinting = false;
       break;
     case 'ArrowRight':
     case 'KeyD':
@@ -165,9 +175,19 @@ function loadGunModel() {
   loader.load('./resources/scene.gltf', (gltf) => {
     gunModel = gltf.scene;
     gunModel.scale.set(2, 2, 2);
-    gunModel.position.set(2, -1, -2);
-    gunModel.rotation.set(0, Math.PI, 0.05);
+    gunModel.position.set(1.2, -1, -1.8);
+    gunModel.rotation.set(0, Math.PI, 0);
     camera.add(gunModel);
+  });
+}
+
+function loadMap() {
+  const loader = new GLTFLoader();
+  loader.load('./resources/flatgrass/gm_flatgrass.gltf', (gltf) => {
+    map = gltf.scene;
+    map.scale.set(0, 0, 0);
+    map.position.set(0, 0, 0);
+    scene.add(map);
   });
 }
 // creates floor
@@ -194,15 +214,15 @@ function createRandomObjects() {
   const sphereMaterial1 = new THREE.MeshBasicMaterial({ color: 0xff6660 });
   const sphereMaterial2 = new THREE.MeshBasicMaterial({ color: 0xffa500 });
 
-  for (let i = 0; i < 500; i++) {
+  for (let i = 0; i < 1300; i++) {
     const pillar = new THREE.Mesh(pillarGeometry, pillarMaterial);
     const sphere = new THREE.Mesh(
       sphereGeometry,
       Math.random() > 0.5 ? sphereMaterial1 : sphereMaterial2
     );
 
-    const x = Math.random() * 1800 - 900;
-    const z = Math.random() * 1800 - 900;
+    const x = Math.random() * 6400 - 3200;
+    const z = Math.random() * 6400 - 3200;
 
     pillar.position.set(x, 50, z);
     sphere.position.set(x, 150, z);
@@ -242,6 +262,11 @@ function animate() {
     if (moveForward || moveBackward) velocity.z -= direction.z * speed * delta;
     if (moveLeft || moveRight) velocity.x -= direction.x * speed * delta;
 
+    // only sprint when moving forward
+    if (!moveForward) {
+      isSprinting = false;
+    }
+
     if (onObject) {
       velocity.y = Math.max(0, velocity.y);
       canJump = true;
@@ -263,8 +288,46 @@ function animate() {
     }
 
     const targetFOV = isSprinting ? sprintFOV : normalFOV;
-    camera.fov += (targetFOV - camera.fov) * fovTransitionSpeed * delta;
+    const fovDelta = (targetFOV - camera.fov) * fovTransitionSpeed * delta;
+    camera.fov += fovDelta;
     camera.updateProjectionMatrix();
+
+    // adjust gun model position and scaling based on FOV changes
+    if (gunModel) {
+      gunModel.position.z += fovDelta * 0.03;
+      gunModel.scale.z -= fovDelta * 0.03;
+
+      // bob effect
+      if (moveForward || moveBackward || moveLeft || moveRight) {
+        bobbingTime += delta * 6;
+        gunModel.position.y += Math.sin(bobbingTime) * 0.002;
+      } else {
+        bobbingTime = 0;
+        gunModel.position.lerp(originalGunPosition, delta * gunReturnSpeed);
+      }
+
+      // reverse lean effect
+      const leanAmount = 0.2;
+      if (moveLeft) {
+        gunModel.rotation.z = THREE.MathUtils.lerp(
+          gunModel.rotation.z,
+          -leanAmount,
+          delta * 5
+        );
+      } else if (moveRight) {
+        gunModel.rotation.z = THREE.MathUtils.lerp(
+          gunModel.rotation.z,
+          leanAmount,
+          delta * 5
+        );
+      } else {
+        gunModel.rotation.z = THREE.MathUtils.lerp(
+          gunModel.rotation.z,
+          0,
+          delta * 5
+        );
+      }
+    }
   }
 
   prevTime = time;
