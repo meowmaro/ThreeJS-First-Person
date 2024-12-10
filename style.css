@@ -40,7 +40,6 @@ h2 {
   align-items: center;
   text-align: center;
   font-size: 14px;
-  cursor: pointer;
   z-index: 2;
 }
 
@@ -58,4 +57,39 @@ h2 {
 #playButton {
   width: 5%;
   height: auto;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+#playButton:hover {
+  transform: scale(1.1);
+}
+
+#score {
+  position: absolute;
+  top: 40px;
+  left: 100px;
+  color: white;
+  font-size: 77px;
+  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000,
+    1px 1px 0 #000;
+}
+
+#saveScoreButton {
+  font-family: 'Host Grotesk', sans-serif;
+  padding: 8px 12px;
+  font-size: 18px;
+  color: white;
+  background-color: rgba(32, 209, 55, 0.4);
+  border: white 4px solid;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  margin-block: 20px;
+  text-shadow: 1px 1px 2px black;
+}
+
+#saveScoreButton:hover {
+  background-color: #307e33;
+  transform: scale(1.1);
 }

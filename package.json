@@ -6,9 +6,19 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "server": "nodemon server.js",
+    "start": "concurrently \"npm run server\" \"npm run dev\""
   },
   "devDependencies": {
+    "concurrently": "^7.0.0",
+    "nodemon": "^2.0.15",
     "vite": "^5.4.10"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "mongoose": "^8.8.4",
+    "three": "^0.171.0"
   }
 }
